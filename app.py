@@ -5,6 +5,7 @@ import string
 import os
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
@@ -19,9 +20,9 @@ if not os.path.exists(nltk_data_path):
     os.mkdir(nltk_data_path)
 nltk.data.path.append(nltk_data_path)
 
-for resource in ['punkt', 'stopwords', 'wordnet']:
+for resource in ['stopwords', 'wordnet']:
     try:
-        nltk.data.find(f"tokenizers/{resource}" if resource == 'punkt' else f"corpora/{resource}")
+        nltk.data.find(f"corpora/{resource}")
     except LookupError:
         nltk.download(resource, download_dir=nltk_data_path)
 
@@ -35,9 +36,10 @@ def extract_text(file):
 
 def preprocess_text(text):
     text = text.lower()
-    tokens = nltk.word_tokenize(text)
+    tokenizer = RegexpTokenizer(r'\w+')
+    tokens = tokenizer.tokenize(text)
     stop_words = set(stopwords.words('portuguese'))
-    tokens = [word for word in tokens if word not in stop_words and word not in string.punctuation]
+    tokens = [word for word in tokens if word not in stop_words]
     lemmatizer = WordNetLemmatizer()
     tokens = [lemmatizer.lemmatize(word) for word in tokens]
     return " ".join(tokens)
